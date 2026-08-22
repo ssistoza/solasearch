@@ -1,6 +1,10 @@
-@import "tailwindcss";
+@import '@fontsource-variable/geist';
+@import 'tailwindcss';
 
 @theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
   --color-rosewater: oklch(0.923 0.024 30.492);
   --color-flamingo: oklch(0.880 0.042 17.975);
   --color-pink: oklch(0.870 0.075 336.304);
@@ -30,6 +34,10 @@
 }
 
 @layer base {
+  :root {
+    color-scheme: dark;
+  }
+
   * {
     border-color: var(--color-overlay0);
   }

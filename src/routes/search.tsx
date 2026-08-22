@@ -6,12 +6,13 @@ import {
 } from '@tanstack/react-router';
 import { useState, type FormEvent } from 'react';
 import * as z from 'zod/mini';
+import { resolveBang } from '#/utils/bangs';
 
 const TABS = [
-  { key: 'search', label: 'All', to: '/search' as const },
-  { key: 'images', label: 'Images', to: '/search/images' as const },
-  { key: 'videos', label: 'Videos', to: '/search/videos' as const },
-  { key: 'news', label: 'News', to: '/search/news' as const },
+  { key: 'search', label: 'all', to: '/search' as const },
+  { key: 'images', label: 'images', to: '/search/images' as const },
+  { key: 'videos', label: 'videos', to: '/search/videos' as const },
+  { key: 'news', label: 'news', to: '/search/news' as const },
 ];
 
 const searchSchema = z.object({
@@ -59,7 +60,13 @@ function SearchLayout() {
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-    if (!query.trim()) return;
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    const bang = resolveBang(trimmed);
+    if (bang) {
+      window.location.href = bang.url;
+      return;
+    }
     if (!deviceToken) {
       setAuthError(
         'Missing ?registration= parameter. Add ?registration=shane to the URL.'
@@ -67,10 +74,12 @@ function SearchLayout() {
       return;
     }
     setAuthError(null);
-    window.location.href = `/search?q=${encodeURIComponent(query.trim())}&registration=${registration}&page=1`;
+    window.location.href = `/search?q=${encodeURIComponent(trimmed)}&registration=${registration}&page=1`;
   }
 
   const searchLinkParams = { q: urlQuery, registration, page: 1 };
+
+  const bang = resolveBang(query);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isImages = pathname === '/search/images';
@@ -83,27 +92,36 @@ function SearchLayout() {
         <div className='max-w-3xl mx-auto px-4 py-3 flex items-center gap-4'>
           <a
             href={`/?registration=${registration}`}
-            className='text-lg font-bold text-text shrink-0'
+            className='text-lg font-bold tracking-tighter text-text shrink-0'
           >
-            Kagi
+            kagi<span className='text-mauve'>.</span>
           </a>
           <form onSubmit={handleSearch} className='flex-1'>
-            <div className='relative'>
+            <div className='flex items-center rounded-lg border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
+              <span aria-hidden className='select-none pl-3 text-mauve'>&gt;</span>
               <input
                 type='text'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 autoFocus
-                placeholder='Search the web...'
-                className='w-full px-4 pr-12 py-2 rounded-full bg-surface0 text-text placeholder-overlay1 focus:outline-none focus:border-lavender focus:ring-1 focus:ring-lavender transition-colors'
+                spellCheck={false}
+                autoComplete='off'
+                placeholder='search the web'
+                className='w-full min-w-0 bg-transparent px-3 py-2 text-base text-text placeholder-overlay1 focus:outline-none'
               />
+              {bang && (
+                <span className='hidden sm:block shrink-0 pr-2 text-xs text-green truncate max-w-40'>
+                  → {new URL(bang.url).hostname}
+                </span>
+              )}
               <button
                 type='submit'
                 disabled={!query.trim()}
-                className='absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-surface1 hover:bg-surface2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer'
+                aria-label='Search'
+                className='mr-1.5 shrink-0 rounded-md p-1.5 text-overlay1 transition-colors hover:bg-surface0 hover:text-text disabled:cursor-not-allowed disabled:opacity-30 enabled:cursor-pointer'
               >
                 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' className='w-4 h-4'>
-                  <path fillRule='evenodd' d='M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z' clipRule='evenodd' />
+                  <path fillRule='evenodd' d='M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z' clipRule='evenodd' />
                 </svg>
               </button>
             </div>
@@ -125,10 +143,10 @@ function SearchLayout() {
                 to={tab.to}
                 search={searchLinkParams}
                 preload='intent'
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${
+                className={`px-4 py-2 text-sm tracking-wide transition-colors cursor-pointer ${
                   isActive
-                    ? 'text-blue border-b-2 border-blue'
-                    : 'text-subtext0 hover:text-subtext1'
+                    ? 'text-mauve border-b-2 border-mauve'
+                    : 'text-overlay1 hover:text-subtext1'
                 }`}
               >
                 {tab.label}

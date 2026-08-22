@@ -2,27 +2,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { searchKagi, KagiWorkflow } from '../../utils/kagi';
 import { Pagination } from '../../components/pagination';
+import { TextSkeleton } from '../../components/skeletons';
 
 export const Route = createFileRoute('/search/')({
   component: SearchAll,
 });
-
-function TextSkeleton() {
-  return (
-    <div className='flex flex-col gap-5 animate-pulse'>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className='flex flex-col gap-2'>
-          <div className='h-3 w-48 rounded bg-surface0' />
-          <div className='h-5 w-72 rounded bg-surface0' />
-          <div className='flex flex-col gap-1.5'>
-            <div className='h-3 w-full rounded bg-surface0' />
-            <div className='h-3 w-3/4 rounded bg-surface0' />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function SearchAll() {
   const { q, registration, page } = Route.useSearch();
@@ -80,12 +64,12 @@ function SearchAll() {
               rel='noopener noreferrer'
               className='block'
             >
-              <div className='text-xs text-overlay1 truncate mb-0.5'>
-                {result.url}
-              </div>
-              <h2 className='text-lg text-blue group-hover:underline leading-snug'>
+              <h2 className='text-lg text-mauve group-hover:underline leading-snug'>
                 {result.title}
               </h2>
+              <div className='text-xs text-overlay1 truncate mt-0.5'>
+                {result.url}
+              </div>
               {result.snippet && (
                 <p
                   className='text-subtext0 text-sm mt-1 line-clamp-2 leading-relaxed [&_b]:text-text'
