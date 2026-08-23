@@ -2,16 +2,16 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 
 interface PaginationProps {
   page: number;
-  registration: string;
+  token: string;
   q: string;
 }
 
-export function Pagination({ page, registration, q }: PaginationProps) {
+export function Pagination({ page, token, q }: PaginationProps) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   function handlePageChange(newPage: number) {
-    navigate({ to: pathname, search: { q, registration, page: newPage } });
+    navigate({ to: pathname, search: { q, token, page: newPage } });
   }
 
   return (

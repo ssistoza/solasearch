@@ -18,16 +18,16 @@ export const Route = createFileRoute('/search/')({
   pendingMs: 100,
   loaderDeps: ({ search }) => ({
     q: search.q,
-    registration: search.registration,
+    token: search.token,
     page: search.page,
   }),
   loader: async ({ deps }): Promise<SearchLoaderData> => {
-    if (!deps.q || !deps.registration) return { results: null };
+    if (!deps.q || !deps.token) return { results: null };
     try {
       const results = await searchKagi({
         data: {
           query: deps.q,
-          deviceToken: deps.registration,
+          deviceToken: deps.token,
           workflow: KagiWorkflow.Search,
           page: deps.page,
           limit: 20,
@@ -44,7 +44,7 @@ export const Route = createFileRoute('/search/')({
 });
 
 function SearchAll() {
-  const { q, registration, page } = Route.useSearch();
+  const { q, token, page } = Route.useSearch();
   const { results, error } = Route.useLoaderData();
 
   if (error) {
@@ -105,7 +105,7 @@ function SearchAll() {
                 <Link
                   key={related.title}
                   to='/search'
-                  search={{ q: related.title, registration, page: 1 }}
+                  search={{ q: related.title, token, page: 1 }}
                   className='px-3 py-1 rounded-full bg-surface0 hover:bg-surface1 text-sm text-subtext1 transition-colors'
                 >
                   {related.title}
@@ -115,7 +115,7 @@ function SearchAll() {
           </div>
         )}
 
-      <Pagination page={page} registration={registration} q={q} />
+      <Pagination page={page} token={token} q={q} />
     </>
   );
 }

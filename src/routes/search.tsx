@@ -18,7 +18,7 @@ const TABS = [
 
 const searchSchema = z.object({
   q: z.catch(z.string(), ''),
-  registration: z.catch(z.string(), ''),
+  token: z.catch(z.string(), ''),
   page: z.catch(z.number(), 1),
 });
 
@@ -38,7 +38,7 @@ function ErrorPage({ error }: { error: Error }) {
         <p className='text-overlay1 text-sm'>
           Add{' '}
           <code className='bg-surface0 px-1.5 py-0.5 rounded text-subtext1'>
-            ?registration=shane
+            ?token=&lt;your-token&gt;
           </code>{' '}
           to the URL.
         </p>
@@ -48,16 +48,14 @@ function ErrorPage({ error }: { error: Error }) {
 }
 
 function SearchLayout() {
-  const { q: urlQuery, registration } = Route.useSearch();
+  const { q: urlQuery, token } = Route.useSearch();
   const navigate = useNavigate({ from: '/search' });
 
   const [query, setQuery] = useState(urlQuery);
 
-  const deviceToken = registration || null;
+  const deviceToken = token || null;
   const [authError, setAuthError] = useState(
-    deviceToken
-      ? null
-      : 'Missing ?registration= parameter. Add ?registration=shane to the URL.'
+    deviceToken ? null : 'Missing or invalid ?token= parameter.'
   );
 
   function handleSearch(e: FormEvent) {
@@ -70,19 +68,17 @@ function SearchLayout() {
       return;
     }
     if (!deviceToken) {
-      setAuthError(
-        'Missing ?registration= parameter. Add ?registration=shane to the URL.'
-      );
+      setAuthError('Missing or invalid ?token= parameter.');
       return;
     }
     setAuthError(null);
     navigate({
       to: '/search',
-      search: { q: trimmed, registration, page: 1 },
+      search: { q: trimmed, token, page: 1 },
     });
   }
 
-  const searchLinkParams = { q: urlQuery, registration, page: 1 };
+  const searchLinkParams = { q: urlQuery, token, page: 1 };
 
   const bang = resolveBang(query);
 
@@ -96,7 +92,7 @@ function SearchLayout() {
       <header className='shrink-0 bg-base border-b border-surface0'>
         <div className='max-w-3xl mx-auto px-4 py-3 flex items-center gap-4'>
           <a
-            href={`/?registration=${registration}`}
+            href={`/?token=${token}`}
             className='text-lg font-bold tracking-tighter text-text shrink-0'
           >
             kagi<span className='text-mauve'>.</span>

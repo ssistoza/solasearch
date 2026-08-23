@@ -27,15 +27,15 @@ function Home() {
       return
     }
     const params = new URLSearchParams(window.location.search)
-    const registration = params.get('registration')
-    if (!registration) {
-      setAuthError('Missing ?registration= parameter. Add ?registration=shane to the URL.')
+    const token = params.get('token')
+    if (!token) {
+      setAuthError('Missing or invalid ?token= parameter.')
       return
     }
     setAuthError(null)
     navigate({
       to: '/search',
-      search: { q: trimmed, registration, page: 1 },
+      search: { q: trimmed, token, page: 1 },
     })
   }
 
