@@ -95,7 +95,7 @@ function SearchLayout() {
             href={`/?token=${token}`}
             className='text-lg font-bold tracking-tighter text-text shrink-0'
           >
-            kagi<span className='text-mauve'>.</span>
+            solasearch<span className='text-mauve'>.</span>
           </a>
           <form onSubmit={handleSearch} className='flex-1'>
             <div className='flex items-center rounded-lg border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>

@@ -54,9 +54,9 @@ function Home() {
         <div className='flex w-full max-w-xl flex-col items-center gap-10'>
           <header className='flex flex-col items-center gap-3'>
             <h1 className='text-5xl font-bold tracking-tighter'>
-              kagi<span className='text-mauve'>.</span>
+              solasearch<span className='text-mauve'>.</span>
             </h1>
-            <p className='text-sm text-overlay1'>fast private web search</p>
+            <p className='text-sm text-overlay1'>your personal search engine</p>
           </header>
 
           <form onSubmit={handleSearch} className='w-full'>

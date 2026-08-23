@@ -1,5 +1,5 @@
 {
-  "name": "kagi-search-proxy",
+  "name": "solasearch",
   "private": true,
   "type": "module",
   "imports": {
