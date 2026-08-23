@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { decode } from 'html-entities';
 import { Result, TaggedError } from 'better-result';
 import { ENV } from 'varlock/env';
 import { validateDeviceToken } from './auth';
@@ -110,7 +111,25 @@ async function fetchKagiSearch(
     );
   }
 
-  return Result.ok(parseResult.value);
+  const data = parseResult.value.data;
+  const decoded: KagiSearchResponse['data'] = {
+    search: data.search.map(decodeEntities),
+    image: data.image?.map(decodeEntities),
+    video: data.video?.map(decodeEntities),
+    news: data.news?.map(decodeEntities),
+    podcast: data.podcast?.map(decodeEntities),
+    related_search: data.related_search?.map(decodeEntities),
+  };
+
+  return Result.ok({ ...parseResult.value, data: decoded });
+}
+
+function decodeEntities<T extends { title: string; snippet?: string }>(item: T): T {
+  return {
+    ...item,
+    title: decode(item.title),
+    ...(item.snippet !== undefined ? { snippet: decode(item.snippet) } : {}),
+  };
 }
 
 export const searchKagi = createServerFn({ method: 'POST' })

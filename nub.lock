@@ -26,6 +26,9 @@ importers:
       better-result:
         specifier: ^3.0.1
         version: 3.0.1
+      html-entities:
+        specifier: ^2.6.0
+        version: 2.6.0
       nitro:
         specifier: ^3.0.260610-beta
         version: 3.0.260610-beta(jiti@2.7.0)(vite@8.2.1(@types/node@22.20.1)(jiti@2.7.0))
@@ -731,6 +734,9 @@ packages:
 
   hookable@6.1.1:
     resolution: {integrity: sha512-U9LYDy1CwhMCnprUfeAZWZGByVbhd54hwepegYTK7Pi5NvqEj63ifz5z+xukznehT7i6NIZRu89Ay1AZmRsLEQ==}
+
+  html-entities@2.6.0:
+    resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
 
   httpxy@0.5.5:
     resolution: {integrity: sha512-uDjmnPyp1q4Sgzf3w+J/Fc6UqcCEj0x4Wjp7OqK5dGhNeDgpyrAmnS6ey8QWrX3SWDon2DMKf9sBa5X9+CVyMA==}
@@ -1933,6 +1939,8 @@ snapshots:
       srvx: 0.11.22
 
   hookable@6.1.1: {}
+
+  html-entities@2.6.0: {}
 
   httpxy@0.5.5: {}
 
