@@ -110,8 +110,6 @@ async function fetchKagiSearch(
     );
   }
 
-  console.log('Kagi response', parseResult.value);
-
   return Result.ok(parseResult.value);
 }
 

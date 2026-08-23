@@ -1,35 +1,19 @@
-import {
-  createRouter as createTanStackRouter,
-} from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { routerWithQueryClient } from '@tanstack/react-router-with-query'
+import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
-export function getRouter() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 60 * 24,
-        gcTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    },
-  })
+const ONE_DAY = 1000 * 60 * 60 * 24
 
+export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
-    context: { queryClient },
     scrollRestoration: true,
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    defaultStaleTime: ONE_DAY,
+    defaultPreloadStaleTime: ONE_DAY,
+    defaultGcTime: ONE_DAY * 7,
   })
 
-  return routerWithQueryClient(router, queryClient, {
-    WrapProvider: ({ children }) => (
-      <QueryClientProvider client={queryClient}>
-        {children as React.ReactNode}
-      </QueryClientProvider>
-    ),
-  })
+  return router
 }
 
 declare module '@tanstack/react-router' {

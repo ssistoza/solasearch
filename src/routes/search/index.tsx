@@ -1,8 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { searchKagi, KagiWorkflow } from '../../utils/kagi';
+import {
+  searchKagi,
+  KagiWorkflow,
+  type KagiSearchResponse,
+} from '../../utils/kagi';
 import { Pagination } from '../../components/pagination';
 import { TextSkeleton } from '../../components/skeletons';
+
+interface SearchLoaderData {
+  results: KagiSearchResponse | null;
+  error?: string;
+}
 
 export const Route = createFileRoute('/search/')({
   component: SearchAll,
@@ -13,66 +21,48 @@ export const Route = createFileRoute('/search/')({
     registration: search.registration,
     page: search.page,
   }),
-  loader: async ({ context, deps }) => {
-    if (!deps.q || !deps.registration) return;
-    await context.queryClient
-      .ensureQueryData({
-        queryKey: ['search', deps.q, deps.registration, deps.page],
-        queryFn: () =>
-          searchKagi({
-            data: {
-              query: deps.q,
-              deviceToken: deps.registration,
-              workflow: KagiWorkflow.Search,
-              page: deps.page,
-              limit: 20,
-            },
-          }),
-      })
-      .catch(() => undefined);
+  loader: async ({ deps }): Promise<SearchLoaderData> => {
+    if (!deps.q || !deps.registration) return { results: null };
+    try {
+      const results = await searchKagi({
+        data: {
+          query: deps.q,
+          deviceToken: deps.registration,
+          workflow: KagiWorkflow.Search,
+          page: deps.page,
+          limit: 20,
+        },
+      });
+      return { results };
+    } catch (error) {
+      return {
+        results: null,
+        error: error instanceof Error ? error.message : 'Search failed',
+      };
+    }
   },
 });
 
 function SearchAll() {
   const { q, registration, page } = Route.useSearch();
-
-  const {
-    data: results,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['search', q, registration, page],
-    queryFn: () =>
-      searchKagi({
-        data: {
-          query: q,
-          deviceToken: registration,
-          workflow: KagiWorkflow.Search,
-          page,
-          limit: 20,
-        },
-      }),
-    enabled: !!q && !!registration,
-  });
-
-  if (isLoading) return <TextSkeleton />;
+  const { results, error } = Route.useLoaderData();
 
   if (error) {
     return (
       <div className='text-center py-12'>
         <p className='text-red mb-2'>Search failed</p>
-        <p className='text-overlay1 text-sm'>{error.message}</p>
+        <p className='text-overlay1 text-sm'>{error}</p>
       </div>
     );
   }
-
-  const webResults = results?.data?.search ?? [];
 
   if (!results) {
     return (
       <div className='text-center text-overlay1 py-12'>No results yet</div>
     );
   }
+
+  const webResults = results.data.search;
 
   return (
     <>
@@ -106,7 +96,7 @@ function SearchAll() {
         ))}
       </div>
 
-      {results.data?.related_search &&
+      {results.data.related_search &&
         results.data.related_search.length > 0 && (
           <div className='mt-8 pt-6 border-t border-surface0'>
             <h3 className='text-overlay1 text-sm mb-2'>Related searches</h3>

@@ -103,7 +103,9 @@ function SearchLayout() {
           </a>
           <form onSubmit={handleSearch} className='flex-1'>
             <div className='flex items-center rounded-lg border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
-              <span aria-hidden className='select-none pl-3 text-mauve'>&gt;</span>
+              <span aria-hidden className='select-none pl-3 text-mauve'>
+                &gt;
+              </span>
               <input
                 type='text'
                 value={query}
@@ -112,7 +114,7 @@ function SearchLayout() {
                 spellCheck={false}
                 autoComplete='off'
                 placeholder='search the web'
-                className='w-full min-w-0 bg-transparent px-3 py-2 text-base text-text placeholder-overlay1 focus:outline-none'
+                className='w-full min-w-0 bg-transparent px-3 py-2 text-text placeholder-overlay1 focus:outline-none'
               />
               {bang && (
                 <span className='hidden sm:block shrink-0 pr-2 text-xs text-green truncate max-w-40'>
@@ -125,8 +127,17 @@ function SearchLayout() {
                 aria-label='Search'
                 className='mr-1.5 shrink-0 rounded-md p-1.5 text-overlay1 transition-colors hover:bg-surface0 hover:text-text disabled:cursor-not-allowed disabled:opacity-30 enabled:cursor-pointer'
               >
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' className='w-4 h-4'>
-                  <path fillRule='evenodd' d='M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z' clipRule='evenodd' />
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                  className='w-4 h-4'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z'
+                    clipRule='evenodd'
+                  />
                 </svg>
               </button>
             </div>
