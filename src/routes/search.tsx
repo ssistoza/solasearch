@@ -5,9 +5,11 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import * as z from 'zod/mini';
 import { resolveBang } from '#/utils/bangs';
+import { useAutosuggest } from '#/hooks/use-autosuggest';
+import { SuggestList } from '#/components/suggest-list';
 
 const TABS = [
   { key: 'search', label: 'all', to: '/search' as const },
@@ -58,9 +60,17 @@ function SearchLayout() {
     deviceToken ? null : 'Missing or invalid ?token= parameter.'
   );
 
-  function handleSearch(e: FormEvent) {
-    e.preventDefault();
-    const trimmed = query.trim();
+  const {
+    items,
+    activeIndex,
+    setActiveIndex,
+    reset: resetSuggestions,
+  } = useAutosuggest(query);
+  const suggestOpen = items.length > 0;
+  const SUGGEST_LIST_ID = 'header-suggest-list';
+
+  function submitQuery(value: string) {
+    const trimmed = value.trim();
     if (!trimmed) return;
     const bang = resolveBang(trimmed);
     if (bang) {
@@ -76,6 +86,35 @@ function SearchLayout() {
       to: '/search',
       search: { q: trimmed, token, page: 1 },
     });
+  }
+
+  function handleSearch(e: FormEvent) {
+    e.preventDefault();
+    submitQuery(query);
+  }
+
+  function handleInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (!suggestOpen) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActiveIndex((i) => Math.min(i + 1, items.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActiveIndex((i) => Math.max(i - 1, -1));
+        break;
+      case 'Enter':
+        if (activeIndex >= 0 && items[activeIndex]) {
+          e.preventDefault();
+          submitQuery(items[activeIndex]);
+          resetSuggestions();
+        }
+        break;
+      case 'Escape':
+        resetSuggestions();
+        break;
+    }
   }
 
   const searchLinkParams = { q: urlQuery, token, page: 1 };
@@ -98,7 +137,7 @@ function SearchLayout() {
             solasearch<span className='text-mauve'>.</span>
           </a>
           <form onSubmit={handleSearch} className='flex-1'>
-            <div className='flex items-center rounded-lg border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
+            <div className='relative flex items-center rounded-lg border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
               <span aria-hidden className='select-none pl-3 text-mauve'>
                 &gt;
               </span>
@@ -106,9 +145,18 @@ function SearchLayout() {
                 type='text'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                onBlur={() => setTimeout(resetSuggestions, 120)}
                 autoFocus
                 spellCheck={false}
                 autoComplete='off'
+                role='combobox'
+                aria-expanded={suggestOpen}
+                aria-controls={suggestOpen ? SUGGEST_LIST_ID : undefined}
+                aria-autocomplete='list'
+                aria-activedescendant={
+                  activeIndex >= 0 ? `${SUGGEST_LIST_ID}-opt-${activeIndex}` : undefined
+                }
                 placeholder='search the web'
                 className='w-full min-w-0 bg-transparent px-3 py-2 text-text placeholder-overlay1 focus:outline-none'
               />
@@ -136,6 +184,18 @@ function SearchLayout() {
                   />
                 </svg>
               </button>
+              {suggestOpen && (
+                <SuggestList
+                  items={items}
+                  activeIndex={activeIndex}
+                  listId={SUGGEST_LIST_ID}
+                  onHover={setActiveIndex}
+                  onSelect={(item) => {
+                    submitQuery(item);
+                    resetSuggestions();
+                  }}
+                />
+              )}
             </div>
           </form>
         </div>

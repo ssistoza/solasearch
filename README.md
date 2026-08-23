@@ -37,6 +37,8 @@ One user, one token, one bill that's yours alone.
 - **Bangs** — `!gh tanstack`, `rust !mdn`, `!yt lo-fi`, etc. redirect straight
   to ~45 supported sites for free (no Kagi query spent); unknown bangs fall
   back to a normal search
+- **Query autocomplete** — debounced suggestions from DuckDuckGo's public
+  suggest endpoint (no API key), skipped while typing a bang
 - **Token gate** — every Kagi request must carry your device token, so a
   deployed instance can't be used by strangers at your expense
 

@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useRef, useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { resolveBang } from '#/utils/bangs'
+import { useAutosuggest } from '#/hooks/use-autosuggest'
+import { SuggestList } from '#/components/suggest-list'
 
 export const Route = createFileRoute('/')({
   component: Home,
 })
 
 const BANG_HINTS = ['gh', 'w', 'yt', 'so', 'mdn', 'npm']
+const SUGGEST_LIST_ID = 'home-suggest-list'
 
 function Home() {
   const navigate = useNavigate({ from: '/' })
@@ -14,12 +17,17 @@ function Home() {
   const [query, setQuery] = useState('')
   const [authError, setAuthError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const {
+    items,
+    activeIndex,
+    setActiveIndex,
+    reset: resetSuggestions,
+  } = useAutosuggest(query)
 
-  const bang = resolveBang(query)
+  const suggestOpen = items.length > 0
 
-  function handleSearch(e: FormEvent) {
-    e.preventDefault()
-    const trimmed = query.trim()
+  function submitQuery(value: string) {
+    const trimmed = value.trim()
     if (!trimmed) return
     const bang = resolveBang(trimmed)
     if (bang) {
@@ -39,10 +47,41 @@ function Home() {
     })
   }
 
+  function handleSearch(e: FormEvent) {
+    e.preventDefault()
+    submitQuery(query)
+  }
+
+  function handleInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (!suggestOpen) return
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setActiveIndex((i) => Math.min(i + 1, items.length - 1))
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setActiveIndex((i) => Math.max(i - 1, -1))
+        break
+      case 'Enter':
+        if (activeIndex >= 0 && items[activeIndex]) {
+          e.preventDefault()
+          submitQuery(items[activeIndex])
+          resetSuggestions()
+        }
+        break
+      case 'Escape':
+        resetSuggestions()
+        break
+    }
+  }
+
   function handleBangChip(key: string) {
     setQuery(`!${key} `)
     inputRef.current?.focus()
   }
+
+  const bang = resolveBang(query)
 
   return (
     <div className='relative flex min-h-dvh flex-col bg-base text-text'>
@@ -60,19 +99,40 @@ function Home() {
           </header>
 
           <form onSubmit={handleSearch} className='w-full'>
-            <div className='flex items-center rounded-xl border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
+            <div className='relative flex items-center rounded-xl border border-surface0 bg-crust transition-colors focus-within:border-mauve/60 focus-within:bg-mantle'>
               <span aria-hidden className='select-none pl-4 text-lg text-mauve'>&gt;</span>
               <input
                 ref={inputRef}
                 type='text'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                onBlur={() => setTimeout(resetSuggestions, 120)}
                 autoFocus
                 spellCheck={false}
                 autoComplete='off'
+                role='combobox'
+                aria-expanded={suggestOpen}
+                aria-controls={suggestOpen ? SUGGEST_LIST_ID : undefined}
+                aria-autocomplete='list'
+                aria-activedescendant={
+                  activeIndex >= 0 ? `${SUGGEST_LIST_ID}-opt-${activeIndex}` : undefined
+                }
                 placeholder='search the web'
                 className='w-full bg-transparent px-3 py-3.5 text-base text-text placeholder-overlay1 focus:outline-none'
               />
+              {suggestOpen && (
+                <SuggestList
+                  items={items}
+                  activeIndex={activeIndex}
+                  listId={SUGGEST_LIST_ID}
+                  onHover={setActiveIndex}
+                  onSelect={(item) => {
+                    submitQuery(item)
+                    resetSuggestions()
+                  }}
+                />
+              )}
               <button
                 type='submit'
                 disabled={!query.trim()}
