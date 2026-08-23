@@ -71,14 +71,18 @@ function SearchLayout() {
     items,
     activeIndex,
     setActiveIndex,
+    open: suggestOpen,
+    trackChange,
+    onFocus: trackFocus,
+    onBlur: trackBlur,
     reset: resetSuggestions,
-  } = useAutosuggest(query);
-  const suggestOpen = items.length > 0;
+  } = useAutosuggest(urlQuery);
   const SUGGEST_LIST_ID = 'header-suggest-list';
 
   function submitQuery(value: string) {
     const trimmed = value.trim();
     if (!trimmed) return;
+    resetSuggestions();
     const bang = resolveBang(trimmed);
     if (bang) {
       window.location.href = bang.url;
@@ -115,7 +119,6 @@ function SearchLayout() {
         if (activeIndex >= 0 && items[activeIndex]) {
           e.preventDefault();
           submitQuery(items[activeIndex]);
-          resetSuggestions();
         }
         break;
       case 'Escape':
@@ -151,9 +154,13 @@ function SearchLayout() {
               <input
                 type='text'
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  trackChange(e.target.value);
+                }}
                 onKeyDown={handleInputKeyDown}
-                onBlur={() => setTimeout(resetSuggestions, 120)}
+                onFocus={trackFocus}
+                onBlur={trackBlur}
                 autoFocus
                 spellCheck={false}
                 autoComplete='off'
@@ -199,7 +206,6 @@ function SearchLayout() {
                   onHover={setActiveIndex}
                   onSelect={(item) => {
                     submitQuery(item);
-                    resetSuggestions();
                   }}
                 />
               )}
