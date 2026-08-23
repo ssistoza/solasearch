@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  redirect,
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router';
@@ -28,6 +29,12 @@ export const Route = createFileRoute('/search')({
   validateSearch: searchSchema,
   errorComponent: ErrorPage,
   component: SearchLayout,
+  beforeLoad: ({ search }) => {
+    const bang = resolveBang(search.q);
+    if (bang) {
+      throw redirect({ href: bang.url });
+    }
+  },
 });
 
 function ErrorPage({ error }: { error: Error }) {
