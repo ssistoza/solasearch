@@ -6,6 +6,31 @@ import { TextSkeleton } from '../../components/skeletons';
 
 export const Route = createFileRoute('/search/videos')({
   component: SearchVideos,
+  pendingComponent: TextSkeleton,
+  pendingMs: 100,
+  loaderDeps: ({ search }) => ({
+    q: search.q,
+    registration: search.registration,
+    page: search.page,
+  }),
+  loader: async ({ context, deps }) => {
+    if (!deps.q || !deps.registration) return;
+    await context.queryClient
+      .ensureQueryData({
+        queryKey: ['search', 'videos', deps.q, deps.registration, deps.page],
+        queryFn: () =>
+          searchKagi({
+            data: {
+              query: deps.q,
+              deviceToken: deps.registration,
+              workflow: KagiWorkflow.Videos,
+              page: deps.page,
+              limit: 20,
+            },
+          }),
+      })
+      .catch(() => undefined);
+  },
 });
 
 function SearchVideos() {

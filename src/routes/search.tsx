@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  useNavigate,
   useRouterState,
 } from '@tanstack/react-router';
 import { useState, type FormEvent } from 'react';
@@ -48,6 +49,7 @@ function ErrorPage({ error }: { error: Error }) {
 
 function SearchLayout() {
   const { q: urlQuery, registration } = Route.useSearch();
+  const navigate = useNavigate({ from: '/search' });
 
   const [query, setQuery] = useState(urlQuery);
 
@@ -74,7 +76,10 @@ function SearchLayout() {
       return;
     }
     setAuthError(null);
-    window.location.href = `/search?q=${encodeURIComponent(trimmed)}&registration=${registration}&page=1`;
+    navigate({
+      to: '/search',
+      search: { q: trimmed, registration, page: 1 },
+    });
   }
 
   const searchLinkParams = { q: urlQuery, registration, page: 1 };

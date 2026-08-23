@@ -2,14 +2,17 @@ import {
   HeadContent,
   Outlet,
   Scripts,
-  createRootRoute,
+  createRootRouteWithContext,
 } from '@tanstack/react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import type { QueryClient } from '@tanstack/react-query';
 
 import appCss from '../styles.css?url';
 
-export const Route = createRootRoute({
+interface RouterContext {
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -22,25 +25,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // 10 minutes
-            staleTime: 1000 * 60 * 10,
-          },
-        },
-      })
-  );
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RootDocument>
-        <Outlet />
-      </RootDocument>
-    </QueryClientProvider>
-  );
+  return <RootDocument><Outlet /></RootDocument>;
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {

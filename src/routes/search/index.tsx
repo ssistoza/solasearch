@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { searchKagi, KagiWorkflow } from '../../utils/kagi';
 import { Pagination } from '../../components/pagination';
@@ -6,6 +6,31 @@ import { TextSkeleton } from '../../components/skeletons';
 
 export const Route = createFileRoute('/search/')({
   component: SearchAll,
+  pendingComponent: TextSkeleton,
+  pendingMs: 100,
+  loaderDeps: ({ search }) => ({
+    q: search.q,
+    registration: search.registration,
+    page: search.page,
+  }),
+  loader: async ({ context, deps }) => {
+    if (!deps.q || !deps.registration) return;
+    await context.queryClient
+      .ensureQueryData({
+        queryKey: ['search', deps.q, deps.registration, deps.page],
+        queryFn: () =>
+          searchKagi({
+            data: {
+              query: deps.q,
+              deviceToken: deps.registration,
+              workflow: KagiWorkflow.Search,
+              page: deps.page,
+              limit: 20,
+            },
+          }),
+      })
+      .catch(() => undefined);
+  },
 });
 
 function SearchAll() {
@@ -87,13 +112,14 @@ function SearchAll() {
             <h3 className='text-overlay1 text-sm mb-2'>Related searches</h3>
             <div className='flex flex-wrap gap-2'>
               {results.data.related_search.map((related) => (
-                <a
+                <Link
                   key={related.title}
-                  href={`/search?q=${encodeURIComponent(related.title)}&registration=${registration}&page=1`}
+                  to='/search'
+                  search={{ q: related.title, registration, page: 1 }}
                   className='px-3 py-1 rounded-full bg-surface0 hover:bg-surface1 text-sm text-subtext1 transition-colors'
                 >
                   {related.title}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
